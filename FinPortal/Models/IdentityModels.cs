@@ -75,8 +75,6 @@ namespace FinPortal.Models
 
         public DbSet<Household> Households { get; set; }
 
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-
         public DbSet<Budget> Budgets { get; set; }
 
         public DbSet<Invitation> Invitations { get; set; }

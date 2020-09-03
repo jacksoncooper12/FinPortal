@@ -40,7 +40,7 @@ namespace FinPortal.Controllers
         public ActionResult Create()
         {
             ViewBag.BudgetItemId = new SelectList(db.BudgetItems, "Id", "ItemName");
-            ViewBag.OwnerId = new SelectList(db.ApplicationUsers, "Id", "FirstName");
+            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName");
             return View();
         }
 
@@ -59,7 +59,7 @@ namespace FinPortal.Controllers
             }
 
             ViewBag.BudgetItemId = new SelectList(db.BudgetItems, "Id", "ItemName", transaction.BudgetItemId);
-            ViewBag.OwnerId = new SelectList(db.ApplicationUsers, "Id", "FirstName", transaction.OwnerId);
+            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", transaction.OwnerId);
             return View(transaction);
         }
 
@@ -76,7 +76,7 @@ namespace FinPortal.Controllers
                 return HttpNotFound();
             }
             ViewBag.BudgetItemId = new SelectList(db.BudgetItems, "Id", "ItemName", transaction.BudgetItemId);
-            ViewBag.OwnerId = new SelectList(db.ApplicationUsers, "Id", "FirstName", transaction.OwnerId);
+            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", transaction.OwnerId);
             return View(transaction);
         }
 
@@ -94,7 +94,7 @@ namespace FinPortal.Controllers
                 return RedirectToAction("Index");
             }
             ViewBag.BudgetItemId = new SelectList(db.BudgetItems, "Id", "ItemName", transaction.BudgetItemId);
-            ViewBag.OwnerId = new SelectList(db.ApplicationUsers, "Id", "FirstName", transaction.OwnerId);
+            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", transaction.OwnerId);
             return View(transaction);
         }
 
