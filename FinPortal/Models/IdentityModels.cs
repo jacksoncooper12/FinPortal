@@ -53,6 +53,13 @@ namespace FinPortal.Models
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
             var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
+            var hhId = HouseholdId != null ? HouseholdId.ToString(): "";
+            var avatarPath = AvatarPath != null ? AvatarPath : "";
+            var fullName = FullName != null ? FullName : "";
+            userIdentity.AddClaim(new Claim("HouseholdId", hhId));
+            userIdentity.AddClaim(new Claim("AvatarPath", avatarPath));
+            userIdentity.AddClaim(new Claim("FullName", fullName));
+
             // Add custom user claims here
             return userIdentity;
         }

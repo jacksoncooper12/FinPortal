@@ -1,4 +1,5 @@
 ﻿using FinPortal.Enums;
+using FinPortal.Extensions;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace FinPortal.Models
         [Display(Name = "Warning Balance")]
         public decimal WarningBalance { get; set; }
 
-        [Display(Name = "Warning Balance")]
+        [Display(Name = "Delete")]
         public bool IsDeleted { get; set; }
 
         public virtual ICollection<Transaction> Transactions { get; set; }
@@ -45,6 +46,7 @@ namespace FinPortal.Models
             WarningBalance = warningBalance;
             Created = DateTime.Now;
             AccountName = accountName;
+            HouseholdId = (int)HttpContext.Current.User.Identity.GetHouseholdId();
             OwnerId = HttpContext.Current.User.Identity.GetUserId();
         }
         public BankAccount()
