@@ -559,6 +559,87 @@ canvas {
 
 /* Global Styles */
 /* Main Styles */
+.tabs {
+    position: relative;
+    margin: 1rem 0rem;
+    background-color: cornflowerblue;
+    height: auto;
+    width: 100%;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px
+}
+
+    .tabs::before,
+    .tabs::after {
+        content: "";
+        display: table;
+    }
+
+    .tabs::after {
+        clear: both;
+    }
+
+.tab {
+    float: left;
+}
+
+.tab-switch {
+    display: none;
+}
+
+.tab-label {
+    position: relative;
+    display: block;
+    line-height: 2.75em;
+    height: 3em;
+    padding: 0 5.45rem;
+    background-color: cornflowerblue;
+    border-right: 0.125rem solid cornflowerblue;
+    color: #fff;
+    cursor: pointer;
+    top: 0;
+    transition: all 0.25s;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px
+}
+
+    .tab-label:hover {
+        top: -0.25rem;
+        transition: top 0.25s;
+    }
+
+.tab-content {
+    height: 28.5rem;
+    position: absolute;
+    z-index: 1;
+    top: 2.75em;
+    left: 0;
+    padding: 1.618rem;
+    background: #fff;
+    color: #2c3e50;
+    border-bottom: 0.25rem solid cornflowerblue;
+    opacity: 0;
+    transition: all 0.35s;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px
+}
+
+.tab-switch:checked + .tab-label {
+    background: #fff;
+    color: #2c3e50;
+    border-bottom: 0;
+    border-right: 0.125rem solid #fff;
+    transition: all 0.35s;
+    z-index: 1;
+    top: -0.0625rem;
+}
+
+.tab-switch:checked + label + .tab-content {
+    z-index: 2;
+    opacity: 1;
+    transition: all 0.35s;
+}
+
 aside.left-panel {
   background: #fff;
   height: 100vh;
@@ -1994,6 +2075,20 @@ header .form-inline {
   padding: 15px;
   margin-left: 90px; }
 
+#hh:hover {
+    background-color: #98e86b;
+    cursor: pointer;
+}
+#ac:hover {
+    background-color: #98e86b;
+    cursor: pointer;
+}
+#bd:hover {
+    background-color: #98e86b;
+    cursor:pointer;
+}
+
+
 .stat-widget-three .stat-digit {
   font-size: 30px; }
 
@@ -2046,9 +2141,10 @@ header .form-inline {
   .stat-widget-five .stat-text {
     color: #455a64;
     font-size: 20px; }
-  .stat-widget-five .stat-heading {
-    color: #99abb4;
-    font-size: 14px; }
+    .stat-widget-five .stat-heading {
+        color: #455a64;
+        font-size: 15px;
+    }
 
 .horizontal:before {
   background: #ffffff;

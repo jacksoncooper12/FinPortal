@@ -18,6 +18,11 @@ jQuery(document).ready(function($) {
 		event.stopPropagation();
 		$('.search-trigger').parent('.header-left').addClass('open');
 	});
+	$('#search-other').on('click', function (event) {
+		event.preventDefault();
+		event.stopPropagation();
+		$('.search-trigger').parent('.header-left').addClass('open');
+	});
 
 	$('.search-close').on('click', function(event) {
 		event.preventDefault();
@@ -38,7 +43,7 @@ jQuery(document).ready(function($) {
 		$(this).prop('Counter',0).animate({
 			Counter: $(this).text()
 		}, {
-			duration: 3000,
+			duration: 2000,
 			easing: 'swing',
 			step: function (now) {
 				$(this).text(Math.ceil(now));

@@ -12,6 +12,7 @@ using FinPortal.Models;
 using FinPortal.Helpers;
 using System.Web.Configuration;
 using System.IO;
+using System.Net.Mail;
 
 namespace FinPortal.Controllers
 {
@@ -21,6 +22,9 @@ namespace FinPortal.Controllers
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
         private RoleHelper roleHelper = new RoleHelper();
+        private ApplicationDbContext db = new ApplicationDbContext();
+        EmailService svc = new EmailService();
+        readonly string from = "Financial Portal<jacksoncooper12@gmail.com>";
 
         public AccountController()
         {
@@ -155,7 +159,7 @@ namespace FinPortal.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, AvatarPath =  "Avatars/lightblueuser.png"};
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, AvatarPath =  "/Avatars/lightblueuser.png"};
                 if (model.Avatar != null)
                 {
                     if (ImageUploadValidator.IsWebFriendlyImage(model.Avatar))
@@ -168,15 +172,33 @@ namespace FinPortal.Controllers
 
                 }
                 var result = await UserManager.CreateAsync(user, model.Password);
+                if (user.Roles.FirstOrDefault() == null)
+                {
+                    roleHelper.AddUserToRole(user.Id, "New User");
+                }
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code }, protocol: Request.Url.Scheme);
+                    try
+                    {
+                        var from = "Financial Portal<jacksoncooper12@gmail.com>";
+                        var email = new MailMessage(from, model.Email)
+                        {
+                            Subject = "Confirm Your Acount",
+                            Body = "Please confirm your email by clicking <a href=\"" + callbackUrl + "\">here</a> ",
+                            IsBodyHtml = true
+                        };
+                        var svc = new EmailService();
+                        await svc.SendAsync(email);
+                        //return View("EmailConfirmed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        await Task.FromResult(0);
+                    }
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -187,9 +209,47 @@ namespace FinPortal.Controllers
             return View(model);
         }
 
-        //
-        // GET: /Account/ConfirmEmail
+        [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Invite(string email, string message)
+        {
+            var user = db.Users.Find(User.Identity.GetUserId());
+            string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+            try
+            {
+                var emaildos = new MailMessage(from, email)
+                {
+                    Subject = "Household Invitation",
+                    Body = $"<p>{message}</p></br></br><p><a href='https://localhost:44378/'>Log In/Create an Account</a></p><p> then enter this Id to join this Household:<p><h2>{user.Household.Id}</h2>",
+                    IsBodyHtml = true
+                };
+                await svc.SendAsync(emaildos);
+                return RedirectToAction("Success");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await Task.FromResult(0);
+                return RedirectToAction("Failed");
+            }
+        }
+
+        [AllowAnonymous]
+        public ActionResult Failed()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult Success()
+        {
+            return View();
+        }
+
+            //
+            // GET: /Account/ConfirmEmail
+            [AllowAnonymous]
         public async Task<ActionResult> ConfirmEmail(string userId, string code)
         {
             if (userId == null || code == null)

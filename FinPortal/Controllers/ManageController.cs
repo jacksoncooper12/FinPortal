@@ -7,6 +7,10 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using FinPortal.Models;
+using FinPortal.Helpers;
+using System.Web.Configuration;
+using System.IO;
+using Microsoft.Ajax.Utilities;
 
 namespace FinPortal.Controllers
 {
@@ -15,6 +19,7 @@ namespace FinPortal.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private ApplicationDbContext db = new ApplicationDbContext();
 
         public ManageController()
         {
@@ -242,6 +247,37 @@ namespace FinPortal.Controllers
             }
             AddErrors(result);
             return View(model);
+        }
+        [HttpPost]
+        public ActionResult ChangeAvatar(HttpPostedFileBase file)
+        {
+            if (file != null)
+            {
+                if (ImageUploadValidator.IsWebFriendlyImage(file))
+                {
+                    var user = db.Users.Find(User.Identity.GetUserId());
+                    var fileName = FileStamp.MakeUnique(file.FileName);
+                    var serverFolder = WebConfigurationManager.AppSettings["DefaultServerFolder"];
+                    file.SaveAs(Path.Combine(Server.MapPath(serverFolder), fileName));
+                    user.AvatarPath = $"{serverFolder}{fileName}";
+                    db.SaveChanges();
+                }
+
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        public ActionResult ChangeName(string firstName, string lastName)
+        {
+            if (!firstName.IsNullOrWhiteSpace() && !lastName.IsNullOrWhiteSpace() && firstName.Length < 12 && lastName.Length < 12)
+            {
+                var user = db.Users.Find(User.Identity.GetUserId());
+                user.FirstName = firstName;
+                user.LastName = lastName;
+                db.SaveChanges();
+            }
+            return RedirectToAction("Index", "Home");
         }
 
         //

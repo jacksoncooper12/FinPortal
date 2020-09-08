@@ -1,0 +1,91 @@
+﻿@model FinPortal.Models.Household
+
+@{
+    ViewBag.Title = "Success";
+    var hHelper = new FinPortal.Helpers.HouseholdHelper();
+}
+
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <h2>Are you sure you want to join this Household? </h2>
+            </div>
+        </div>
+        <div class="jumbotron" style="margin-top:2rem">
+            <div class="row">
+                <div class="col">
+                    <h2 style="padding-right:10rem">@Model.HouseholdName</h2>
+                </div>
+                <div class="col">
+                    <div style="font-size:24px; "><span style="border-bottom:1px solid black">Head: @hHelper.ListUsersInHouseholdInRole(Model.Id, "Head").FirstOrDefault().FullName</span></div>
+                    <div style="font-size:20px">@Model.Greeting</div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-widget-five">
+                            <div class="stat-icon dib flat-color-4">
+                                <i class="pe-7s-users"></i>
+                            </div>
+                            <div class="stat-content" id="members">
+                                <div class="text-left dib">
+                                    <div class="stat-text"><span class="count">@Model.Members.Count()</span></div>
+                                    <div class="stat-heading"> Members</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-widget-five">
+                            <div class="stat-icon dib flat-color-3">
+                                <i class="pe-7s-browser "></i>
+                            </div>
+                            <div class="stat-content" id="account">
+                                <div class="text-left dib">
+                                    <div class="stat-text"><span class="count">@Model.Accounts.Count()</span></div>
+                                    <div class="stat-heading"> Accounts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-widget-five">
+                            <div class="stat-icon dib flat-color-2">
+                                <i class="pe-7s-cart"></i>
+                            </div>
+                            <div class="stat-content" id="budget">
+                                <div class="text-left dib">
+                                    <div class="stat-text"><span class="count">@Model.Budgets.Count()</span></div>
+                                    <div class="stat-heading"> Budgets</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                @using (Html.BeginForm("JoinHousehold", "Households", FormMethod.Post, new { @class = "search-form", role = "form" }))
+                {
+                    @Html.AntiForgeryToken();
+                    @Html.HiddenFor(g => g.Id)
+                    <h1><button type="submit" style="background-color:cornflowerblue; font-size:25px; color:white; margin-top:1rem" class="btn">Join Household</button></h1>
+                }
+            </div>
+        </div>
+    </div>
+
+
+

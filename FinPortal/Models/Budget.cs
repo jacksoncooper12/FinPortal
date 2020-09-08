@@ -40,6 +40,7 @@ namespace FinPortal.Models
             Items = new HashSet<BudgetItem>();
             Created = DateTime.Now;
             OwnerId = HttpContext.Current.User.Identity.GetUserId();
+            CurrentAmount = 0;
         }
 
 

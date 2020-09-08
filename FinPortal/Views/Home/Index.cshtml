@@ -1,36 +1,363 @@
 ﻿@using Microsoft.AspNet.Identity
 @using FinPortal.Extensions
+@using FinPortal.Helpers
 @{
     ViewBag.Title = "Home Page";
+    var roleHelper = new RoleHelper();
+    var userHelper = new UserHelper();
+    var user = userHelper.CurrentUser();
+
+}
+@if (User.IsInRole("New User"))
+{
+    <div class="container">
+        <div class="row" style="margin-top:8rem">
+            <div class="col text-center">
+                <h1>You don't own or belong to a Household, <br /><a href="#" style="color:cornflowerblue">Create</a> or <a href="#" style="color:cornflowerblue" id="search-other">Join</a> one to get started.</h1>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    decimal x = 0;
+
+    foreach (var account in user.Household.Accounts)
+    {
+        x = x + account.CurrentBalance;
+    }
+    var average = x / user.Household.Accounts.Count();
+
+    <div class="modal fade ct" id="jmodal" style="padding-top:7rem">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+                <div class="modal-header text-center" style=" ">
+                    <h2 class="modal-title">Send Invitation</h2>
+                </div>
+                <div class="modal-body" style=" padding:30px">
+                    @using (Html.BeginForm("Invite", "Account", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4 class="bPad">Email</h4>
+                                <h5>@Html.Editor("email", new { htmlAttributes = new { @class = "form-control" } })</h5>
+                            </div>
+                        </div>
+                        <div class="row morePad">
+                            <div class="col-md-12">
+                                <h4 class="bPad">Message (optional)</h4>
+                                <h5>@Html.TextArea("message", new { rows = 5, cols = 10, @class = "form-control" })</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <button type="submit" class="btn cb">Send Invitation</button>
+                            </div>
+                        </div>
+
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col">
+                <h1 style="padding-right:10rem">@user.Household.HouseholdName</h1>
+            </div>
+            <div class="col">
+                @if (User.IsInRole("Head") || User.IsInRole("Admin"))
+                {
+                    <div style="font-size:24px"><a href="@Url.Action("Edit","Households",new { user.Household.Id})">Edit Your Household</a></div>
+                }
+                <div style="font-size:20px">@user.Household.Greeting</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="card" id="hh" data-toggle="modal" data-target="#jmodal">
+                <div class="card-body">
+                    <div class="stat-widget-five">
+                        <div class="stat-icon dib flat-color-4">
+                            <i class="pe-7s-users"></i>
+                        </div>
+                        <div class="stat-content" id="members">
+                            <div class="text-left dib">
+                                <div class="stat-text"><span class="count">@user.Household.Members.Count()</span></div>
+                                <div class="stat-heading">Members</div>
+                            </div>
+                        </div>
+                        <div class="stat-content" id="cMembers">
+                            <div class="text-left dib">
+                                <div class="stat-text">Invite<br />Someone</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card" id="ab">
+                <div class="card-body">
+                    <div class="stat-widget-five">
+                        <div class="stat-icon dib flat-color-1">
+                            <i class="pe-7s-cash"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="text-left dib">
+                                <div class="stat-text">$<span class="count">@average</span></div>
+                                <div class="stat-heading"> Average Balance</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card" id="ac">
+                <div class="card-body">
+                    <div class="stat-widget-five">
+                        <div class="stat-icon dib flat-color-3">
+                            <i class="pe-7s-browser "></i>
+                        </div>
+                        <div class="stat-content" id="account">
+                            <div class="text-left dib">
+                                <div class="stat-text"><span class="count">@user.Household.Accounts.Count()</span></div>
+                                <div class="stat-heading"> Accounts</div>
+                            </div>
+                        </div>
+                        <div class="stat-content" id="cAccount">
+                            <div class="text-left dib">
+                                <div class="stat-text">Create New Account</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card" id="bd">
+                <div class="card-body">
+                    <div class="stat-widget-five">
+                        <div class="stat-icon dib flat-color-2">
+                            <i class="pe-7s-cart"></i>
+                        </div>
+                        <div class="stat-content" id="budget">
+                            <div class="text-left dib">
+                                <div class="stat-text"><span class="count">@user.Household.Budgets.Count()</span></div>
+                                <div class="stat-heading"> Budgets</div>
+                            </div>
+                        </div>
+                        <div class="stat-content" id="cBudget">
+                            <div class="text-left dib">
+                                <div class="stat-text">Create New Budget</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-6">
+            <div class="panel-group white" id="accordion">
+                <div class="panel-group panel-primary">
+                    <div class="panel-heading" data-target="#panel1" data-toggle="collapse">
+                        <div class="row">
+                            <div class="col">
+                                View All
+                            </div>
+                            <div class="col text-right">
+                                <i class="fa fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-collapse collapse" id="panel1">
+                        <div class="panel-body">
+                            <div class="row spacePad">
+                                <div class="col">
+                                    <table class="dataTable table" id="membersTable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    Members
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var member in user.Household.Members)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @member.FullName
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+            <div class="panel-group white" id="accordion">
+                <div class="panel-group panel-primary">
+                    <div class="panel-heading" data-target="#panel2" data-toggle="collapse">
+                        <div class="row">
+                            <div class="col">
+                                View All
+                            </div>
+                            <div class="col text-right">
+                                <i class="fa fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-collapse collapse" id="panel2">
+                        <div class="panel-body">
+                            <div class="row spacePad">
+                                <div class="col">
+                                    <table class="dataTable table" id="accountTable" style="font-size:13px">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    Account
+                                                </th>
+                                                <th>
+                                                    Owner
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var account in user.Household.Accounts)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @account.AccountName
+                                                    </td>
+                                                    <td>
+                                                        @account.Owner.FullName
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="panel-group white" id="accordion">
+                <div class="panel-group panel-primary">
+                    <div class="panel-heading" data-target="#panel3" data-toggle="collapse">
+                        <div class="row">
+                            <div class="col">
+                                View All
+                            </div>
+                            <div class="col text-right">
+                                <i class="fa fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-collapse collapse" id="panel3">
+                        <div class="panel-body">
+                            <h3>heyyy</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row morePad">
+        <div class="col-6">
+            <div class="panel-group white" id="accordion" style="border:2px solid cornflowerblue">
+                <div class="panel-group panel-primary">
+                    <div class="panel-heading" data-target="#panel4" data-toggle="collapse">
+                        <div class="row">
+                            <div class="col">
+                                My Accounts
+                            </div>
+                            <div class="col text-right">
+                                <i class="fa fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-collapse collapse" id="panel4">
+                        <div class="panel-body">
+                            <h3>heyyy</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="panel-group white" id="accordion" style="border:2px solid cornflowerblue">
+                <div class="panel-group panel-primary">
+                    <div class="panel-heading" data-target="#panel5" data-toggle="collapse">
+                        <div class="row">
+                            <div class="col">
+                                My Budgets
+                            </div>
+                            <div class="col text-right">
+                                <i class="fa fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-collapse collapse" id="panel">
+                        <div class="panel-body">
+                            <h3>heyyy</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+@section scripts{
+    <script>
+        jQuery(document).ready(function () {
+            jQuery('#cBudget').hide();
+        });
+        jQuery(document).ready(function () {
+            jQuery('#cAccount').hide();
+        });
+        jQuery(document).ready(function () {
+            jQuery('#cMembers').hide();
+        });
+        jQuery('#bd').hover(function () {
+            jQuery('#budget').toggle();
+            jQuery('#cBudget').toggle();
+        });
+        jQuery('#ac').hover(function () {
+            jQuery('#account').toggle();
+            jQuery('#cAccount').toggle();
+        });
+        jQuery('#hh').hover(function () {
+            jQuery('#cMembers').toggle();
+            jQuery('#members').toggle();
+        });
+        jQuery(document).ready(function () {
+            jQuery('#membersTable').DataTable({
+                "pageLength": 10
+            });
+        });
+        jQuery(document).ready(function () {
+            jQuery('#accountTable').DataTable({
+                "pageLength": 10
+            });
+        });
 
-<div class="row">
-    <div class="col-md-4">
-        <h3>Name: @User.Identity.GetFullName()</h3>
-        <h3>Household Id: @User.Identity.GetHouseholdId()</h3>
-        <h3>Avatar:</h3>
-        <img src=" @User.Identity.GetAvatarPath()" width="100" />
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
+    </script>
+}

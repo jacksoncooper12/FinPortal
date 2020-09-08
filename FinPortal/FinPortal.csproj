@@ -191,9 +191,11 @@
     </Compile>
     <Compile Include="Helpers\FileStamp.cs" />
     <Compile Include="Helpers\FileUploadValidator.cs" />
+    <Compile Include="Helpers\HouseholdHelper.cs" />
     <Compile Include="Helpers\ImageUploadValidator.cs" />
     <Compile Include="Helpers\RoleHelper.cs" />
     <Compile Include="Helpers\StringUtilities.cs" />
+    <Compile Include="Helpers\UserHelper.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\BankAccount.cs" />
@@ -207,9 +209,13 @@
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="ViewModels\BankAccountWizardVM.cs" />
+    <Compile Include="ViewModels\BudgetWizardVM.cs" />
+    <Compile Include="ViewModels\ConfigureHouseVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Avatars\lightblueuser.png" />
+    <Content Include="Content\all.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\cs-skin-elastic.css" />
     <Content Include="Images\admin.jpg" />
@@ -303,13 +309,18 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="ViewModels\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\style.css.map" />
     <Content Include="Content\bootstrap.css.map" />
     <None Include="packages.config" />
     <Content Include="Scripts\bootstrap.js.map" />
+    <Content Include="Views\Households\ConfigureHousehold.cshtml" />
+    <Content Include="Views\Households\Success.cshtml" />
+    <Content Include="Views\Households\Failed.cshtml" />
+    <Content Include="private.config" />
+    <Content Include="Views\Account\Success.cshtml" />
+    <Content Include="Views\Account\Failed.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

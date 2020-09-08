@@ -11,6 +11,10 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using FinPortal.Models;
+using System.Web.Configuration;
+using System.Web.Mail;
+using System.Net.Mail;
+using System.Net;
 
 namespace FinPortal
 {
@@ -20,6 +24,33 @@ namespace FinPortal
         {
             // Plug in your email service here to send an email.
             return Task.FromResult(0);
+        }
+        public async Task SendAsync(System.Net.Mail.MailMessage message)
+        {
+            var GmailUsername = WebConfigurationManager.AppSettings["username"];
+            var GmailPassword = WebConfigurationManager.AppSettings["password"];
+            var host = WebConfigurationManager.AppSettings["host"];
+            int port = Convert.ToInt32(WebConfigurationManager.AppSettings["port"]);
+            using (var smtp = new SmtpClient()
+            {
+                Host = host,
+                Port = port,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(GmailUsername, GmailPassword)
+            })
+            {
+                try
+                {
+                    await smtp.SendMailAsync(message);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    await Task.FromResult(0);
+                }
+            }
         }
     }
 

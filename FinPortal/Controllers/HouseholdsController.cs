@@ -10,6 +10,7 @@ using System.Web.Mvc;
 using FinPortal.Extensions;
 using FinPortal.Helpers;
 using FinPortal.Models;
+using FinPortal.ViewModels;
 using Microsoft.AspNet.Identity;
 
 namespace FinPortal.Controllers
@@ -51,27 +52,106 @@ namespace FinPortal.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "New User")]
         public async Task<ActionResult> Create([Bind(Include = "Id,HouseholdName,Greeting")] Household household)
         {
             if (ModelState.IsValid)
             {
+                var user = db.Users.Find(User.Identity.GetUserId());
                 household.Created = DateTime.Now;
                 db.Households.Add(household);
                 db.SaveChanges();
 
-                var user = db.Users.Find(User.Identity.GetUserId());
+
                 user.HouseholdId = household.Id;
                 roleHelper.UpdateUserRole(user.Id, "Head");
                 db.SaveChanges();
 
                 await AuthorizeExtensions.RefreshAuthentication(HttpContext, user);
 
-                return RedirectToAction("Index");
+                return RedirectToAction("ConfigureHousehold");
             }
-
             return View(household);
         }
 
+        [HttpPost]
+        public ActionResult FindHousehold(int Id)
+        {
+            var household = db.Households.Find(Id);
+            if (household == null){
+                return RedirectToAction("Failed");
+            }
+            else
+            {
+                return RedirectToAction("Success", "Households", new { Id });
+            }
+        }
+        [HttpPost]
+        public async Task<ActionResult> JoinHousehold(int Id)
+        {
+            var user = db.Users.Find(User.Identity.GetUserId());
+            var household = db.Households.Find(Id);
+            if (household == null)
+            {
+                return RedirectToAction("Failed");
+            }
+            user.HouseholdId = household.Id;
+            roleHelper.UpdateUserRole(user.Id, "Member");
+            db.SaveChanges();
+
+            await AuthorizeExtensions.RefreshAuthentication(HttpContext, user);
+            return RedirectToAction("Index", "Home");
+        }
+
+        public ActionResult Failed()
+        {
+            return View();
+        }
+
+        public ActionResult Success(int Id)
+        {
+            var household = db.Households.Find(Id);
+            return View(household);
+        }
+
+        public ActionResult ConfigureHousehold()
+        {
+            var model = new ConfigureHouseVM();
+            model.HouseholdId = User.Identity.GetHouseholdId();
+            if (model.HouseholdId == null)
+            {
+                return RedirectToAction("Create");
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ConfigureHousehold(ConfigureHouseVM model)
+        {
+            var bankAccount = new BankAccount(model.BankAccount.StartingBalance, model.BankAccount.WarningBalance, model.BankAccount.AccountName);
+            bankAccount.AccountType = model.BankAccount.AccountType;
+            bankAccount.HouseholdId = (int)model.HouseholdId;
+            db.BankAccounts.Add(bankAccount);
+
+            db.SaveChanges();
+
+            var budget = new Budget();
+            budget.HouseholdId = (int)model.HouseholdId;
+            budget.BudgetName = model.Budget.BudgetName;
+            db.Budgets.Add(budget);
+
+            db.SaveChanges();
+
+            var budgetItem = new BudgetItem();
+            budgetItem.BudgetId = budget.Id;
+            budgetItem.TargetAmount = model.BudgetItem.TargetAmount;
+            budgetItem.ItemName = model.BudgetItem.ItemName;
+            db.BudgetItems.Add(budgetItem);
+            db.SaveChanges();
+
+            return RedirectToAction("Index", "Home");
+        }
         // GET: Households/Edit/5
         public ActionResult Edit(int? id)
         {
