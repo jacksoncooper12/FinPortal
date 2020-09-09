@@ -51,7 +51,7 @@ namespace FinPortal.Models
         }
         public BankAccount()
         {
-            StartingBalance = -1;
+
         }
     }
 }

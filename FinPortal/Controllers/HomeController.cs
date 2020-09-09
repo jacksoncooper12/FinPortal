@@ -5,15 +5,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using FinPortal.Enums;
 
 namespace FinPortal.Controllers
 {
     public class HomeController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+        
         [Authorize]
         public ActionResult Index()
         {
+            var acType = new BankAccount();
             return View();
         }
         public PartialViewResult _LoginPartial()

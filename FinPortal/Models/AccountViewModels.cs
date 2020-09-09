@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Web;
 
@@ -94,6 +95,13 @@ namespace FinPortal.Models
         public string LastName { get; set; }
 
         public HttpPostedFileBase Avatar { get; set; }
+
+    }
+    public class AcceptInvitation : ExtendedRegisterViewModel
+    {
+        public int InvitationId { get; set; }
+        public Guid code { get; set; }
+        public int HouseholdId { get; set; }
 
     }
 

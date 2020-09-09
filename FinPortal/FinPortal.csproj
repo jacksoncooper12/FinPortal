@@ -186,9 +186,14 @@
     <Compile Include="Enums\TransactionType.cs" />
     <Compile Include="Extensions\AuthorizeExtensions.cs" />
     <Compile Include="Extensions\IdentityExtensions.cs" />
+    <Compile Include="Extensions\InvitationExtensions.cs" />
+    <Compile Include="Extensions\TransactionExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\BankAccountHelper.cs" />
+    <Compile Include="Helpers\BudgetHelper.cs" />
+    <Compile Include="Helpers\InvitationHelper.cs" />
     <Compile Include="Helpers\FileStamp.cs" />
     <Compile Include="Helpers\FileUploadValidator.cs" />
     <Compile Include="Helpers\HouseholdHelper.cs" />
@@ -321,6 +326,7 @@
     <Content Include="private.config" />
     <Content Include="Views\Account\Success.cshtml" />
     <Content Include="Views\Account\Failed.cshtml" />
+    <Content Include="Views\Account\AcceptInvitation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

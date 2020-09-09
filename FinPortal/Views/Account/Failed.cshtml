@@ -18,7 +18,8 @@
             seconds = seconds - 1;
             if (seconds < 0) {
                 jQuery(function () {
-                    window.location.href = jQuery('.className').attr('href');                });
+                    window.location.href = jQuery('.className').attr('href');
+                });
             } else {
                 document.getElementById("countdown").innerHTML = seconds;
                 window.setTimeout("countdown()", 1000);

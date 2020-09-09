@@ -1,8 +1,29 @@
 ﻿
-<div class="row" style="padding-top:5rem">
-    <div class="col text-center">
-        <h1>Your invitation email has been sent</h1>
-        <h2>You will be redirected to the homepage in <span id="countdown"></span></h2>
+<div class="container">
+    <div class="row">
+        <div class="col text-center">
+            <h1 class="bigPad">Your invitation email has been successfully sent</h1>
+            <h3>You will be redirected to the homepage in <span id="countdown">11</span></h3>
+        </div>
     </div>
 </div>
+@Html.ActionLink(" ", "Index", "Home", null, new { display = "none", @class = "className" })
 
+
+@section scripts{
+    <script>
+        var seconds = 11;
+        function countdown() {
+            seconds = seconds - 1;
+            if (seconds < 0) {
+                jQuery(function () {
+                    window.location.href = jQuery('.className').attr('href');
+                });
+            } else {
+                document.getElementById("countdown").innerHTML = seconds;
+                window.setTimeout("countdown()", 1000);
+            }
+        }
+        countdown();
+    </script>
+}

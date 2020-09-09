@@ -75,16 +75,20 @@ namespace FinPortal.Controllers
         }
 
         [HttpPost]
-        public ActionResult FindHousehold(int Id)
+        public ActionResult FindHousehold(string code)
         {
-            var household = db.Households.Find(Id);
-            if (household == null){
-                return RedirectToAction("Failed");
-            }
-            else
+            var realGuid = Guid.Parse(code);
+            var invitation = db.Invitations.FirstOrDefault(i => i.Code == realGuid);
+            if (invitation == null)
             {
-                return RedirectToAction("Success", "Households", new { Id });
+                return View("NotFound", invitation);
             }
+            var expirationDate = invitation.Created.AddDays(invitation.TTL);
+            if (invitation.IsValid && DateTime.Now < expirationDate)
+            {
+                return RedirectToAction("Success","Households", new { invitation.Household.Id});
+            }
+            return View();
         }
         [HttpPost]
         public async Task<ActionResult> JoinHousehold(int Id)

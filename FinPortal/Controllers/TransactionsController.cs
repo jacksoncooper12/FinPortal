@@ -6,12 +6,14 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using FinPortal.Extensions;
 using FinPortal.Models;
 
 namespace FinPortal.Controllers
 {
     public class TransactionsController : Controller
     {
+        private FinPortal.Helpers.UserHelper userHelper = new Helpers.UserHelper();
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Transactions
@@ -39,6 +41,7 @@ namespace FinPortal.Controllers
         // GET: Transactions/Create
         public ActionResult Create()
         {
+            ViewBag.AccountId = new SelectList(db.BankAccounts, "Id", "AccountName");
             ViewBag.BudgetItemId = new SelectList(db.BudgetItems, "Id", "ItemName");
             ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName");
             return View();
@@ -55,6 +58,8 @@ namespace FinPortal.Controllers
             {
                 db.Transactions.Add(transaction);
                 db.SaveChanges();
+                var thisT = db.Transactions.Include(t=>t.BudgetItem).FirstOrDefault(t=>t.Id == transaction.Id);
+                thisT.UpdateBalances();
                 return RedirectToAction("Index");
             }
 

@@ -4,37 +4,20 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
+using System.Threading.Tasks;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Mvc;
+using FinPortal.Extensions;
 using FinPortal.Models;
+using Microsoft.AspNet.Identity;
 
 namespace FinPortal.Controllers
 {
     public class InvitationsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
-
-        // GET: Invitations
-        public ActionResult Index()
-        {
-            var invitations = db.Invitations.Include(i => i.Household);
-            return View(invitations.ToList());
-        }
-
-        // GET: Invitations/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Invitation invitation = db.Invitations.Find(id);
-            if (invitation == null)
-            {
-                return HttpNotFound();
-            }
-            return View(invitation);
-        }
 
         // GET: Invitations/Create
         public ActionResult Create()
@@ -48,17 +31,28 @@ namespace FinPortal.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,HouseholdId,Body,IsValid,Created,TTL,RecipientEmail,Code")] Invitation invitation)
+        public async Task<ActionResult> Create(string email, string message)
         {
+            var fluffy = new Invitation();
             if (ModelState.IsValid)
             {
-                db.Invitations.Add(invitation);
+                fluffy.RecipientEmail = email;
+                fluffy.Code = Guid.NewGuid();
+                fluffy.HouseholdId = (int)User.Identity.GetHouseholdId();
+                fluffy.Body = message;
+                db.Invitations.Add(fluffy);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                var trySend = await fluffy.SendInvitation();
+                if(trySend == true)
+                {
+                    return RedirectToAction("Success", "Account");
+                }
+                else
+                {
+                    return RedirectToAction("Failed", "Account");
+                }
             }
-
-            ViewBag.HouseholdId = new SelectList(db.Households, "Id", "HouseholdName", invitation.HouseholdId);
-            return View(invitation);
+            return View();
         }
 
         // GET: Invitations/Edit/5
