@@ -3,56 +3,221 @@
 @{
     ViewBag.Title = "Details";
 }
-
-<h2>Details</h2>
-
-<div>
-    <h4>Budget</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Household.HouseholdName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Household.HouseholdName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Owner.FirstName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Owner.FirstName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.BudgetName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.BudgetName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.CurrentAmount)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.CurrentAmount)
-        </dd>
-
-    </dl>
+    <div class="modal fade ct" id="deleteB" style="padding-top:7rem">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+                <div class="modal-header text-center" style=" ">
+                    <h2 class="modal-title">Delete</h2>
+                </div>
+                <div class="modal-body" style=" padding:30px">
+                    @using (Html.BeginForm("Delete", "Budgets", FormMethod.Post))
+                    {
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col text-center">
+                                <h2 class="spacePad">Are you sure you want to<br />delete this Budget?</h2>
+                                <button class="btn cb" type="submit" value="delete" style="margin-top:2rem" onclick="window.location.href='@Url.Action("Delete", "Budgets", new { Model.Id })'"><h3>Delete</h3></button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="row">
+    <div class="col">
+        <div style="font-size:24px; margin-top:-2rem"><a href="@Url.Action("Edit", "Budgets", new { Model.Id })">Edit Your Budget</a></div>
+    </div>
+<div class="col text-right">
+    <div style="font-size:24px; margin-top:-2rem"><a href="#" data-toggle="modal" data-target="#deleteB">Delete Your Budget</a></div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+</div>
+<div class="jumbotron">
+    <div class="row">
+        <div class="col text-center">
+            <h1>@Model.BudgetName</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center baPad">
+            <h4>Current Balance</h4>
+        </div>
+        <div class="col text-center baPad">
+            <h4>Target Balance</h4>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:-4rem !important">
+        <div class="col text-center" style="border-right:2px solid black; padding-top:1.5rem">
+            <h2 style="padding-bottom:2rem">$<span class="count">@Model.CurrentAmount</span></h2>
+        </div>
+        <div class="col text-center" style=" padding-top:1.5rem">
+            <h2>$<span class="count">@Model.TargetAmount</span></h2>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="panel-group white" id="accordion" style="border-bottom:2px solid cornflowerblue" data-target="#panel4" data-toggle="collapse">
+            <div class="panel-group panel-primary">
+                <div class="panel-heading" id="myB">
+                    <div class="row">
+                        <div class="col">
+                            <h4>Budget Items</h4>
+                        </div>
+                        <div class="col text-right">
+                            <i class="fa fa-arrow-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-collapse collapse" id="panel4">
+                    <div class="panel-body morePad">
+                        @if (Model.Items.Count() == 0)
+                        {
+                            <div class="row morePad">
+                                <div class="col text-center">
+                                    <h4>This Budget currently has no Items</h4>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <table class="table dataTable" id="items">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Item
+                                        </th>
+                                        <th>
+                                            Transactions
+                                        </th>
+                                        <th>
+                                            Current
+                                        </th>
+                                        <th>
+                                            Target
+                                        </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Items)
+                                    {
+                                        <tr class="hover" onclick="window.location.href='@Url.Action("Details","BudgetItems",new { item.Id})'">
+                                            <td>
+                                                @item.ItemName
+                                            </td>
+                                            <td>
+                                                @item.Transactions.Count()
+                                            </td>
+                                            <td>
+                                                $@item.CurrentAmount
+                                            </td>
+                                            <td>
+                                                $@item.TargetAmount
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col">
+        <div class="panel-group white" id="accordion" style="border-bottom:2px solid cornflowerblue" data-target="#panel5" data-toggle="collapse">
+            <div class="panel-group panel-primary">
+                <div class="panel-heading" id="myT">
+                    <div class="row">
+                        <div class="col">
+                            <h4>Transactions</h4>
+                        </div>
+                        <div class="col text-right">
+                            <i class="fa fa-arrow-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-collapse collapse" id="panel5">
+                    <div class="panel-body morePad">
+                        @if (Model.Items.SelectMany(g => g.Transactions).Count() == 0)
+                        {
+                            <div class="row morePad">
+                                <div class="col text-center">
+                                    <h4>This Budget currently has no Transactions</h4>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <table class="table dataTable" id="items">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Type
+                                        </th>
+                                        <th>
+                                            Amount
+                                        </th>
+
+                                        <th>
+                                            Item
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.Items.SelectMany(g => g.Transactions))
+                                    {
+                                        <tr class="hover" onclick="window.location.href='@Url.Action("Details","Transactions",new { transaction.Id})'">
+                                            <td>
+                                                @transaction.TransactionType
+                                            </td>
+                                            @if (transaction.TransactionType.ToString() == "Deposit")
+                                            {
+                                                <td style="font-weight:bold; color:forestgreen">
+                                                    $@transaction.Amount
+                                                </td>
+                                            }
+                                            else if (transaction.TransactionType.ToString() == "Withdrawal")
+                                            {
+                                                <td style="font-weight:bold; color:red">
+                                                    $@transaction.Amount
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td style="font-weight:bold; color:forestgreen">
+                                                    $@transaction.Amount
+                                                </td>
+                                            }
+
+                                            <td>
+                                                @transaction.BudgetItem.ItemName
+                                            </td>
+                                            <td>
+                                                @transaction.Created.ToString("MM/dd/yyy")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        jQuery(document).ready(function () {
+            setTimeout(function () { jQuery('#myB').click() }, 300);
+            setTimeout(function () { jQuery('#myT').click() }, 450);
+        });
+    </script>
+}

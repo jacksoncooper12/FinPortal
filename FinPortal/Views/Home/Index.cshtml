@@ -1,4 +1,4 @@
-﻿@model FinPortal.Models.BankAccount
+﻿@model FinPortal.ViewModels.HomeVM
 @using Microsoft.AspNet.Identity
 @using FinPortal.Extensions
 @using FinPortal.Helpers
@@ -11,12 +11,15 @@
     var accountHelper = new BankAccountHelper();
 
 }
+<style>
+
+</style>
 @if (User.IsInRole("New User"))
 {
     <div class="container">
         <div class="row" style="margin-top:8rem">
             <div class="col text-center">
-                <h1>You don't own or belong to a Household, <br /><a href="#" style="color:cornflowerblue">Create</a> or <a href="#" style="color:cornflowerblue" id="search-other">Join</a> one to get started.</h1>
+                <h1>You don't own or belong to a Household, <br /><a href="@Url.Action("Create","Households")" style="color:cornflowerblue">Create</a> or <a href="#" style="color:cornflowerblue" id="search-other">Join</a> one to get started.</h1>
             </div>
         </div>
     </div>
@@ -29,12 +32,91 @@ else
     {
         x = x + account.CurrentBalance;
     }
-    var average = x / user.Household.Accounts.Count();
+    decimal average = 0;
+    if (user.Household.Accounts.Count() > 0)
+    {
+        average = x / user.Household.Accounts.Count();
+    }
+
+
+
+
+    foreach (var hUser in user.Household.Members)
+    {
+        var name = hUser.FirstName + hUser.LastName;
+        <div class="modal fade ct" id="@name" style="padding-top:7rem">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+                    <div class="modal-header text-center" style=" ">
+                        <h2 class="modal-title">User</h2>
+                    </div>
+                    <div class="modal-body" style=" padding:30px">
+                        <div class="row">
+                            <div class="col text-center">
+                                <img src="@hUser.AvatarPath" class="img-circle spacePad" width="150" />
+                                <h2 class="spacePad"> @hUser.FullName (@roleHelper.ListUserRoles(hUser.Id).FirstOrDefault()) </h2>
+                                <h3 class="spacePad">@hUser.Accounts.Where(g => !g.IsDeleted).Count() Accounts</h3>
+                                <h3 class="spacePad">@hUser.Budgets.Where(g=>!g.IsDeleted).Count() Budgets</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="modal fade ct" id="transmodal" style="padding-top:7rem">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+                <div class="modal-header text-center" style=" ">
+                    <h2 class="modal-title">New Transaction</h2>
+                </div>
+                <div class="modal-body" style=" padding:30px">
+                    @using (Html.BeginForm("Create", "Transactions", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="row bPad">
+                            <div class="col-md bPad">
+                                <h5 class="bPad">Bank Account</h5>
+                                <h5>@Html.DropDownList("AccountId", null, "Select an Account", htmlAttributes: new { @class = "form-control" })</h5>
+                            </div>
+                        </div>
+                        <div class="row bPad">
+                            <div class="col-md bPad">
+                                <h5 class="bPad">Budget Item</h5>
+                                <h5>@Html.DropDownList("BudgetItemId", null, "Select a Budget Item", htmlAttributes: new { @class = "form-control" })</h5>
+                            </div>
+                        </div>
+                        <div class="row v">
+                            <div class="col-md-6 bPad">
+                                <h5 class="bPad">Type</h5>
+                                <h5>@Html.EnumDropDownListFor(model => model.Transaction.TransactionType, null, htmlAttributes: new { @class = "form-control" })</h5>
+                            </div>
+                            <div class="col-md-6 bPad">
+                                <h5 class="bPad">Amount</h5>
+                                <h5>@Html.EditorFor(model => model.Transaction.Amount, new { htmlAttributes = new { type = "number", placeholder = "$0.00", @class = "form-control bPad" } })</h5>
+                            </div>
+                        </div>
+                        <div class="row bPad">
+                            <div class="col-md-12 bPad">
+                                <h5 class="bPad">Memo (optional)</h5>
+                                <h5>@Html.TextAreaFor(model => model.Transaction.Memo, new { cols = 10, rows = 4, @class = "form-control bPad" })</h5>
+                            </div>
+                        </div>
+                        <div class="row bPad">
+                            <div class="col-md-2">
+                                <button type="submit" class="btn cb">Create Transaction</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade ct" id="jmodal" style="padding-top:7rem">
         <div class="modal-dialog modal-md">
             <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
-                <div class="modal-header text-center" style=" ">
+                <div class="modal-header text-center">
                     <h2 class="modal-title">Send Invitation</h2>
                 </div>
                 <div class="modal-body" style=" padding:30px">
@@ -88,23 +170,25 @@ else
                         <div class="row">
                             <div class="col-md-12 bPad">
                                 <h5 class="bPad">Account Name</h5>
-                                <h5>@Html.EditorFor(model => model.AccountName, new { htmlAttributes = new { @class = "form-control bPad" } })</h5>
+                                <h5>@Html.EditorFor(model => model.bankAccount.AccountName, new { htmlAttributes = new { @class = "form-control bPad" } })</h5>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 bPad">
                                 <h5 class="bPad">Starting Balance</h5>
-                                <h5>@Html.EditorFor(model => model.CurrentBalance, new { htmlAttributes = new { placeholder = "$0.00", @class = "form-control bPad" } })</h5>
+                                <h5>@Html.EditorFor(model => model.bankAccount.CurrentBalance, new { htmlAttributes = new { type = "number", placeholder = "$0.00", @class = "form-control bPad" } })</h5>
+                                <h5 id="overdrawn" style="font-weight:bold;"></h5>
                             </div>
                             <div class="col-md-6 bPad">
                                 <h5 class="bPad">Warning Balance</h5>
-                                <h5>@Html.EditorFor(model => model.WarningBalance, new { htmlAttributes = new { placeholder = "$0.00", @class = "form-control bPad" } })</h5>
+                                <h5>@Html.EditorFor(model => model.bankAccount.WarningBalance, new { htmlAttributes = new { type = "number", placeholder = "$0.00", @class = "form-control bPad" } })</h5>
+                                <h5 id="warning" style="font-weight:bold"></h5>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 bPad">
                                 <h5 class="bPad">Account Type</h5>
-                                @Html.EnumDropDownListFor(model => model.AccountType, htmlAttributes: new { @class = "form-control bPad" })
+                                @Html.EnumDropDownListFor(model => model.bankAccount.AccountType, htmlAttributes: new { @class = "form-control bPad" })
                             </div>
                         </div>
                         <div class="row">
@@ -129,24 +213,14 @@ else
                         @Html.AntiForgeryToken()
                         <div class="row">
                             <div class="col-md-12 bPad">
-                                <h5 class="bPad">Account Name</h5>
-                                <h5>@Html.EditorFor(model => model.AccountName, new { htmlAttributes = new { @class = "form-control bPad" } })</h5>
+                                <h5 class="bPad">Budget Name</h5>
+                                <h5>@Html.TextBox("BudgetName", null, htmlAttributes: new { @class = "form-control bPad" })</h5>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 bPad">
                                 <h5 class="bPad">Starting Balance</h5>
-                                <h5>@Html.EditorFor(model => model.CurrentBalance, new { htmlAttributes = new { placeholder = "$0.00", @class = "form-control bPad" } })</h5>
-                            </div>
-                            <div class="col-md-6 bPad">
-                                <h5 class="bPad">Warning Balance</h5>
-                                <h5>@Html.EditorFor(model => model.WarningBalance, new { htmlAttributes = new { placeholder = "$0.00", @class = "form-control bPad" } })</h5>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 bPad">
-                                <h5 class="bPad">Account Type</h5>
-                                @Html.EnumDropDownListFor(model => model.AccountType, htmlAttributes: new { @class = "form-control bPad" })
+                                <h5>@Html.TextBox("CurrentAmount", null, htmlAttributes: new { @type = "number", @placeholder = "$0.00", @class = "form-control bPad" })</h5>
                             </div>
                         </div>
                         <div class="row">
@@ -157,6 +231,54 @@ else
                     }
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="modal fade ct" id="newItem" style="padding-top:7rem">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+                <div class="modal-header text-center" style=" ">
+                    <h2 class="modal-title">Create Budget Item</h2>
+                </div>
+                <div class="modal-body" style=" padding:30px">
+                    @using (Html.BeginForm("Create", "BudgetItems", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="row spacePad">
+                            <div class="col-md-12 bPad">
+                                <h5 class="bPad">Budget</h5>
+                                @Html.DropDownList("BudgetId", null, "Select a Budget", htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row spacePad">
+                            <div class="col-md-12 bPad">
+                                <h5 class="bPad">Item Name</h5>
+                                <h5>@Html.TextBox("ItemName", null, htmlAttributes: new { @class = "form-control bPad" })</h5>
+                            </div>
+                        </div>
+                        <div class="row spacePad">
+                            <div class="col-md-6 bPad">
+                                <h5 class="bPad">Target Amount</h5>
+                                <h5>@Html.TextBox("TargetAmount", null, htmlAttributes: new { @type = "number", @placeholder = "$0.00", @class = "form-control bPad" })</h5>
+                            </div>
+                            <div class="col-md-6 bPad">
+                                <h5 class="bPad">Starting Amount</h5>
+                                <h5>@Html.TextBox("CurrentAmount", null, htmlAttributes: new { @type = "number", @placeholder = "$0.00", @class = "form-control bPad" })</h5>
+                            </div>
+                        </div>
+                        <div class="row spacePad">
+                            <div class="col">
+                                <button type="submit" class="btn cb">Create Budget Item</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h4 style="margin-top:-2rem"><a href="@Url.Action("LeaveAsync","Households")">Leave Household</a></h4>
         </div>
     </div>
     <div class="jumbotron">
@@ -198,7 +320,7 @@ else
             </div>
         </div>
         <div class="col-lg-3">
-            <div class="card" id="ab">
+            <div class="card" id="ab" data-target="#chartmodal" data-toggle="modal" style="cursor:pointer">
                 <div class="card-body">
                     <div class="stat-widget-five">
                         <div class="stat-icon dib flat-color-1">
@@ -237,7 +359,7 @@ else
             </div>
         </div>
         <div class="col-lg-3">
-            <div class="card" id="bd">
+            <div class="card" id="bd" data-toggle="modal" data-target="#budmodal">
                 <div class="card-body">
                     <div class="stat-widget-five">
                         <div class="stat-icon dib flat-color-2">
@@ -261,9 +383,9 @@ else
     </div>
     <div class="row">
         <div class="col-md-3 col-6">
-            <div class="panel-group white" id="accordion">
+            <div class="panel-group white ptr" id="accordion" data-target="#panel1" data-toggle="collapse">
                 <div class="panel-group panel-primary">
-                    <div class="panel-heading" data-target="#panel1" data-toggle="collapse">
+                    <div class="panel-heading">
                         <div class="row">
                             <div class="col">
                                 All Members
@@ -288,7 +410,8 @@ else
                                         <tbody>
                                             @foreach (var member in user.Household.Members)
                                             {
-                                                <tr>
+                                                var name = member.FirstName + member.LastName;
+                                                <tr data-target="#@name" data-toggle="modal" class="hover">
                                                     <td>
                                                         @member.FullName
                                                     </td>
@@ -304,12 +427,28 @@ else
             </div>
         </div>
         <div class="col-3">
-            <div class="panel-group" id="accordion" style=" background-color: white; border-radius: 0.25rem; box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);">
+            <div class="panel-group white" id="trans" style="border-radius: 0.25rem; border-bottom:3px solid #98e86b" data-target="#transmodal" data-toggle="modal">
                 <div class="panel-group panel-primary">
-                    <div class="panel-heading" data-target="#chartmodal" data-toggle="modal" style="padding: 15px; padding-left: 20px; padding-right: 20px; ">
+                    <div class="panel-heading">
                         <div class="row">
-                            <div class="col">
-                                Chart
+                            <div class="col-10">
+                                New Transaction
+                            </div>
+                            <div class="col-2 text-right">
+                                <i class="fa fa-plus"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="panel-group white ptr" id="budgi" data-target="#newItem" data-toggle="modal" style="border-radius: 0.25rem; border-bottom: 3px solid #98e86b">
+                <div class="panel-group panel-primary">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-10">
+                                New Budget Item
                             </div>
                             <div class="col text-right">
                                 <i class="fa fa-plus"></i>
@@ -320,9 +459,9 @@ else
             </div>
         </div>
         <div class="col-3">
-            <div class="panel-group white" id="accordion">
+            <div class="panel-group white ptr" id="accordion" data-target="#panel3" data-toggle="collapse">
                 <div class="panel-group panel-primary">
-                    <div class="panel-heading" data-target="#panel2" data-toggle="collapse">
+                    <div class="panel-heading">
                         <div class="row">
                             <div class="col">
                                 All Accounts
@@ -332,11 +471,11 @@ else
                             </div>
                         </div>
                     </div>
-                    <div class="panel-collapse collapse" id="panel2">
+                    <div class="panel-collapse collapse" id="panel3">
                         <div class="panel-body">
                             <div class="row spacePad">
                                 <div class="col">
-                                    <table class="dataTable table" id="accountTable" style="font-size:13px">
+                                    <table class="dataTable table" id="budgetTable" style="font-size:13px">
                                         <thead>
                                             <tr>
                                                 <th>
@@ -363,55 +502,6 @@ else
                                     </table>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-3">
-            <div class="panel-group white" id="accordion">
-                <div class="panel-group panel-primary">
-                    <div class="panel-heading" data-target="#panel3" data-toggle="collapse">
-                        <div class="row">
-                            <div class="col">
-                                All Budgets
-                            </div>
-                            <div class="col text-right">
-                                <i class="fa fa-arrow-down"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-collapse collapse" id="panel3">
-                        <div class="panel-body">
-                            <div class="row spacePad">
-                                <div class="col">
-                                    <table class="dataTable table" id="budgetTable" style="font-size:13px">
-                                        <thead>
-                                            <tr>
-                                                <th>
-                                                    Budget
-                                                </th>
-                                                <th>
-                                                    Owner
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var budget in user.Household.Budgets)
-                                            {
-                                                <tr>
-                                                    <td>
-                                                        @budget.BudgetName
-                                                    </td>
-                                                    <td>
-                                                        @budget.Owner.FullName
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
 
                         </div>
                     </div>
@@ -421,102 +511,221 @@ else
     </div>
     <div class="row morePad">
         <div class="col-6">
-            <div class="panel-group white" id="accordion" style="border-bottom:2px solid cornflowerblue">
+            <div class="panel-group white" id="accordion" style="border-bottom:3px solid cornflowerblue; cursor:pointer" data-target="#panel4" data-toggle="collapse">
                 <div class="panel-group panel-primary">
-                    <div class="panel-heading" id="myA" data-target="#panel4" data-toggle="collapse">
+                    <div class="panel-heading" id="myA">
                         <div class="row">
                             <div class="col">
-                                My Accounts
+                                <h4>My Accounts</h4>
                             </div>
                             <div class="col text-right">
-                                <i class="fa fa-arrow-down"></i>
+                                <h4><i class="fa fa-arrow-down"></i></h4>
                             </div>
                         </div>
                     </div>
                     <div class="panel-collapse collapse" id="panel4">
                         <div class="panel-body toprPad">
-                            <table class="dataTable table" id="mybudgetTable" style="font-size:13px">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            Account
-                                        </th>
-                                        <th>
-                                            Current Balance
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var account in accountHelper.GetMyAccounts())
-                                    {
+                            @if (accountHelper.GetMyAccounts().Count() == 0)
+                            {
+                                <div class="row morePad">
+                                    <div class="col text-center">
+                                        <h4>You don't have any Bank Accounts. To make one:</h4>
+                                        <h4> <button data-toggle="modal" data-target="#accmodal" class="btn cb" style="margin-top:1rem">Click Here</button></h4>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <table class="dataTable table" id="mybudgetTable" style="font-size:13px">
+                                    <thead>
                                         <tr>
-                                            <td>
-                                                @account.AccountName
-                                            </td>
-                                            <td>
-                                                @account.CurrentBalance
-                                            </td>
+                                            <th>
+                                                Account
+                                            </th>
+                                            <th>
+                                                Current Balance
+                                            </th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var account in accountHelper.GetMyAccounts())
+                                        {
+                                            <tr class="hover" onclick="window.location.href='@Url.Action("Details","BankAccounts",new { account.Id})'">
+                                                <td>
+                                                    @account.AccountName
+                                                </td>
+                                                <td>
+                                                    @account.CurrentBalance
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-6">
-            <div class="panel-group white" id="accordion" style="border-bottom:2px solid cornflowerblue">
+            <div class="panel-group white" id="accordion" style="border-bottom:3px solid cornflowerblue; cursor:pointer" data-target="#panel5" data-toggle="collapse">
                 <div class="panel-group panel-primary">
-                    <div class="panel-heading" id="myB" data-target="#panel5" data-toggle="collapse">
+                    <div class="panel-heading" id="myB">
                         <div class="row">
                             <div class="col">
-                                My Budgets
+                                <h4>My Budgets</h4>
                             </div>
                             <div class="col text-right">
-                                <i class="fa fa-arrow-down"></i>
+                                <h4><i class="fa fa-arrow-down"></i></h4>
                             </div>
                         </div>
                     </div>
                     <div class="panel-collapse collapse" id="panel5">
                         <div class="panel-body toprPad">
-                            <table class="dataTable table" id="myaccountTable" style="font-size:13px">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            Budget
-                                        </th>
-                                        <th>
-                                            Current
-                                        </th>
-                                        <th>
-                                            Target
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var budget in budgetHelper.GetMyBudgets())
-                                    {
+                            @if (budgetHelper.GetMyBudgets().Count() == 0)
+                            {
+                                <div class="row morePad">
+                                    <div class="col text-center">
+                                        <h4>You don't have any Budgets. To make one:</h4>
+                                        <h4> <button data-toggle="modal" data-target="#budmodal" class="btn cb" style="margin-top:1rem">Click Here</button></h4>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <table class="dataTable table" id="myaccountTable" style="font-size:13px">
+                                    <thead>
                                         <tr>
-                                            <td>
-                                                @budget.BudgetName
-                                            </td>
-                                            <td>
-                                                @budget.CurrentAmount
-                                            </td>
-                                            <td>
-                                                @budget.TargetAmount
-                                            </td>
+                                            <th>
+                                                Budget
+                                            </th>
+                                            <th>
+                                                Current
+                                            </th>
+                                            <th>
+                                                Target
+                                            </th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var budget in budgetHelper.GetMyBudgets())
+                                        {
+                                            <tr class="hover" onclick="window.location.href='@Url.Action("Details","Budgets",new { budget.Id})'">
+                                                <td>
+                                                    @budget.BudgetName
+                                                </td>
+                                                <td>
+                                                    @budget.CurrentAmount
+                                                </td>
+                                                <td>
+                                                    @budget.TargetAmount
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
 
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="panel-group white" id="accordion" style="border-bottom:2px solid cornflowerblue">
+                <div class="panel-group panel-primary">
+                    <div class="panel-heading" id="myT" data-target="#panel9" data-toggle="collapse">
+                        <div class="row">
+                            <div class="col">
+                                <h4>Transactions</h4>
+                            </div>
+                            <div class="col text-right">
+                                <h4><i class="fa fa-arrow-down"></i></h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-collapse collapse" id="panel9">
+                        <div class="panel-body toprPad">
+                            @if (user.Transactions.Count() == 0)
+                            {
+                                <div class="row morePad">
+                                    <div class="col text-center">
+                                        <h4>You don't have any Transactions.</h4>
+                                        <h4 class="spacePad"> Submit Transactions to update your Accounts/Budgets.</h4>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <table class="table dataTable" id="myTransactionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Type
+                                            </th>
+                                            <th>
+                                                Amount
+                                            </th>
+                                            <th>
+                                                Account
+                                            </th>
+                                            <th>
+                                                Budget Item
+                                            </th>
+                                            <th>
+                                                Date
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var transaction in user.Transactions)
+                                        {
+                                            <tr class="hover" onclick="window.location.href='@Url.Action("Details","Transactions",new { transaction.Id})'">
+                                                <td>
+                                                    @transaction.TransactionType
+                                                </td>
+                                                @if (transaction.TransactionType.ToString() == "Deposit")
+                                                {
+                                                    <td style="font-weight:bold; color:forestgreen">
+                                                        $@transaction.Amount
+                                                    </td>
+                                                }
+                                                else if (transaction.TransactionType.ToString() == "Withdrawal")
+                                                {
+                                                    <td style="font-weight:bold; color:red">
+                                                        $@transaction.Amount
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="font-weight:bold; color:forestgreen">
+                                                        $@transaction.Amount
+                                                    </td>
+                                                }
+
+                                                <td>
+                                                    @transaction.Account.AccountName
+                                                </td>
+                                                <td>
+                                                    @transaction.BudgetItem.ItemName
+                                                </td>
+                                                <td>
+                                                    @transaction.Created.ToString("MM/dd/yyyy")
+                                                </td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
     @section scripts{
         <script>
@@ -547,8 +756,15 @@ else
                 });
             });
             jQuery(document).ready(function () {
+                jQuery('#myTransactionsTable').DataTable({
+                    "pageLength": 10,
+                    "order": [[4, "desc"]]
+                });
+            });
+            jQuery(document).ready(function () {
                 jQuery('#accountTable').DataTable({
-                    "pageLength": 5
+                    "pageLength": 5,
+                    responsive: true
                 });
             });
             jQuery(document).ready(function () {
@@ -567,8 +783,7 @@ else
                 });
             });
             jQuery(document).ready(function () {
-                setTimeout(function () { jQuery('#myA').click() }, 300);
-                setTimeout(function () { jQuery('#myB').click() }, 450);
+                setTimeout(function () { jQuery('#myT').click() }, 300);
             });
         </script>
         <script src="https://cdn.zingchart.com/zingchart.min.js" SameSite="None"></script>
@@ -631,6 +846,31 @@ else
             }
         });
             </script>
+            <script>
+                jQuery("#bankAccount_WarningBalance").keyup(function () {
+                    let wB = parseInt(jQuery("#bankAccount_WarningBalance").val())
+                    let cB = parseInt(jQuery("#bankAccount_CurrentBalance").val())
+                    if (cB < wB) {
+                        jQuery("#warning").html("<i class='fa fa-warning' style='color:gold'></i> Your Warning Balance will be higher than your Current Balance");
+                    }
+                    else {
+                        jQuery("#warning").html("");
+
+                    }
+                    console.log(wB);
+                });
+                jQuery("#bankAccount_CurrentBalance").keyup(function () {
+                    let cB = parseInt(jQuery("#bankAccount_CurrentBalance").val())
+                    if (cB < 0) {
+                        jQuery("#overdrawn").html("<i class='fa fa-warning' style='color:red'></i> You will overdraft your Account with these settings");
+                    }
+                    else {
+                        jQuery("#overdrawn").html("");
+                    }
+                    console.log(wB);
+                });
+            </script>
         }
+
     }
 }

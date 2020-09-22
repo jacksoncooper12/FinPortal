@@ -2083,9 +2083,20 @@ header .form-inline {
     background-color: #98e86b;
     cursor: pointer;
 }
+#trans:hover {
+    background-color: #98e86b;
+    cursor: pointer;
+}#budgi:hover {
+    background-color: #98e86b;
+    cursor: pointer;
+}
 #bd:hover {
     background-color: #98e86b;
     cursor:pointer;
+}
+.table-hover :hover {
+    background-color: #98e86b;
+    cursor: pointer;
 }
 
 

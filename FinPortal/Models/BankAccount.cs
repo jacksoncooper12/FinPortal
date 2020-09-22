@@ -12,7 +12,7 @@ namespace FinPortal.Models
     public class BankAccount
     {
         public int Id { get; set; }
-        public int HouseholdId { get; set; }
+        public int? HouseholdId { get; set; }
         public string OwnerId { get; set; }
 
         public virtual Household Household { get; set; }
@@ -23,7 +23,7 @@ namespace FinPortal.Models
         public DateTime Created { get; set; }
 
         [Display(Name = "Starting Balance")]
-        public decimal StartingBalance { get; internal set; }
+        public decimal StartingBalance { get; set; }
 
         [Display(Name = "Current Balance")]
         public decimal CurrentBalance { get; set; }

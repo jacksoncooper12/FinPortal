@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using FinPortal.Models;
+using Microsoft.AspNet.Identity;
 
 namespace FinPortal.Controllers
 {
@@ -17,7 +18,8 @@ namespace FinPortal.Controllers
         // GET: Budgets
         public ActionResult Index()
         {
-            var budgets = db.Budgets.Include(b => b.Household).Include(b => b.Owner);
+            var user = db.Users.Find(User.Identity.GetUserId());
+            var budgets = db.Budgets.Where(g => g.HouseholdId == user.HouseholdId);
             return View(budgets.ToList());
         }
 
@@ -49,10 +51,14 @@ namespace FinPortal.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,HouseholdId,OwnerId,Created,BudgetName,CurrentAmount")] Budget budget)
+        public ActionResult Create([Bind(Include = "Id,BudgetName,CurrentAmount")] Budget budget)
         {
             if (ModelState.IsValid)
             {
+                var user = db.Users.Find(User.Identity.GetUserId());
+                budget.OwnerId = user.Id;
+                budget.HouseholdId = (int)user.HouseholdId;
+                budget.Created = DateTime.Now;
                 db.Budgets.Add(budget);
                 db.SaveChanges();
                 return RedirectToAction("Index");

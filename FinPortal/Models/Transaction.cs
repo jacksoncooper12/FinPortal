@@ -16,7 +16,7 @@ namespace FinPortal.Models
 
         public virtual BankAccount Account { get; set; }
 
-        public int? BudgetItemId { get; set; }
+        public int BudgetItemId { get; set; }
 
         public virtual BudgetItem BudgetItem { get; set; }
         public string OwnerId { get; set; }

@@ -187,6 +187,7 @@
     <Compile Include="Extensions\AuthorizeExtensions.cs" />
     <Compile Include="Extensions\IdentityExtensions.cs" />
     <Compile Include="Extensions\InvitationExtensions.cs" />
+    <Compile Include="Extensions\NotificationsExtension.cs" />
     <Compile Include="Extensions\TransactionExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -217,12 +218,14 @@
     <Compile Include="ViewModels\BankAccountWizardVM.cs" />
     <Compile Include="ViewModels\BudgetWizardVM.cs" />
     <Compile Include="ViewModels\ConfigureHouseVM.cs" />
+    <Compile Include="ViewModels\HomeVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Avatars\lightblueuser.png" />
     <Content Include="Content\all.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\cs-skin-elastic.css" />
+    <Content Include="favicon.ico" />
     <Content Include="Images\admin.jpg" />
     <Content Include="Images\Avatar\1.jpg" />
     <Content Include="Images\Avatar\2.jpg" />
@@ -237,7 +240,6 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\fullcalendar-init.js" />
     <Content Include="Content\style.css" />
-    <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\jquery.js" />
     <Content Include="Scripts\main.js" />
@@ -327,6 +329,9 @@
     <Content Include="Views\Account\Success.cshtml" />
     <Content Include="Views\Account\Failed.cshtml" />
     <Content Include="Views\Account\AcceptInvitation.cshtml" />
+    <Content Include="Views\Households\ExitDenied.cshtml" />
+    <Content Include="Views\Households\ChangeHead.cshtml" />
+    <None Include="Properties\PublishProfiles\JCFinancialPortal - Web Deploy.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using FinPortal.Models;
+using Microsoft.AspNet.Identity;
 
 namespace FinPortal.Controllers
 {
@@ -19,6 +20,21 @@ namespace FinPortal.Controllers
         {
             var notifications = db.Notifications.Include(n => n.Household).Include(n => n.Recipient);
             return View(notifications.ToList());
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Flip()
+        {
+            var user = db.Users.Find(User.Identity.GetUserId());
+            foreach (var notification in user.Notifications)
+            {
+                if (notification.IsRead == false)
+                {
+                    notification.IsRead = true;
+                    db.SaveChanges();
+                }
+            }
+            return RedirectToAction("Index", "Home");
         }
 
         // GET: Notifications/Details/5

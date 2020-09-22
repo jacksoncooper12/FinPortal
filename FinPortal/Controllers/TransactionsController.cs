@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using FinPortal.Extensions;
 using FinPortal.Models;
+using Microsoft.AspNet.Identity;
 
 namespace FinPortal.Controllers
 {
@@ -19,7 +20,8 @@ namespace FinPortal.Controllers
         // GET: Transactions
         public ActionResult Index()
         {
-            var transactions = db.Transactions.Include(t => t.BudgetItem).Include(t => t.Owner);
+            var user = db.Users.Find(User.Identity.GetUserId());
+            var transactions = db.Transactions.Where(g => g.Account.HouseholdId== user.HouseholdId);
             return View(transactions.ToList());
         }
 
@@ -52,15 +54,20 @@ namespace FinPortal.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,AccountId,BudgetItemId,OwnerId,TransactionType,Created,Amount,Memo,IsDeleted")] Transaction transaction)
+        public ActionResult Create(int AccountId, int BudgetItemId, [Bind(Include = "Id,TransactionType,Amount,Memo")] Transaction transaction)
         {
             if (ModelState.IsValid)
             {
+                var user = db.Users.Find(User.Identity.GetUserId());
+                transaction.OwnerId = user.Id;
+                transaction.Created = DateTime.Now;
+                transaction.AccountId = AccountId;
+                transaction.BudgetItemId = BudgetItemId;
                 db.Transactions.Add(transaction);
                 db.SaveChanges();
                 var thisT = db.Transactions.Include(t=>t.BudgetItem).FirstOrDefault(t=>t.Id == transaction.Id);
                 thisT.UpdateBalances();
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.BudgetItemId = new SelectList(db.BudgetItems, "Id", "ItemName", transaction.BudgetItemId);
@@ -94,9 +101,12 @@ namespace FinPortal.Controllers
         {
             if (ModelState.IsValid)
             {
+                var oldTransaction = db.Transactions.AsNoTracking().FirstOrDefault(g=>g.Id == transaction.Id);
                 db.Entry(transaction).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                var newTransaction = db.Transactions.FirstOrDefault(g=>g.Id == transaction.Id);
+                newTransaction.EditTransaction(oldTransaction);
+                return RedirectToAction("Details", new { transaction.Id});
             }
             ViewBag.BudgetItemId = new SelectList(db.BudgetItems, "Id", "ItemName", transaction.BudgetItemId);
             ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", transaction.OwnerId);
@@ -124,6 +134,7 @@ namespace FinPortal.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Transaction transaction = db.Transactions.Find(id);
+            transaction.DeleteTransaction();
             db.Transactions.Remove(transaction);
             db.SaveChanges();
             return RedirectToAction("Index");

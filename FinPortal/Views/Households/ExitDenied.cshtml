@@ -1,0 +1,11 @@
+﻿
+@{
+    ViewBag.Title = "ExitDenied";
+}
+<div class="row morePad">
+    <div class="col text-center">
+        <h2 class="morePad">@Html.Raw(TempData["Message"])</h2>
+        <h2> To leave, <a href="@Url.Action("ChangeHead")">Change Head</a></h2>
+    </div>
+</div>
+

@@ -64,12 +64,20 @@ namespace FinPortal.Controllers
 
 
                 user.HouseholdId = household.Id;
+                foreach(var account in user.Accounts)
+                {
+                    account.HouseholdId = household.Id;
+                }
+                foreach (var budget in user.Budgets)
+                {
+                    budget.HouseholdId = household.Id;
+                }
                 roleHelper.UpdateUserRole(user.Id, "Head");
                 db.SaveChanges();
 
                 await AuthorizeExtensions.RefreshAuthentication(HttpContext, user);
 
-                return RedirectToAction("ConfigureHousehold");
+                return RedirectToAction("Index", "Home");
             }
             return View(household);
         }
@@ -100,6 +108,14 @@ namespace FinPortal.Controllers
                 return RedirectToAction("Failed");
             }
             user.HouseholdId = household.Id;
+            foreach (var account in user.Accounts)
+            {
+                account.HouseholdId = household.Id;
+            }
+            foreach (var budget in user.Budgets)
+            {
+                budget.HouseholdId = household.Id;
+            }
             roleHelper.UpdateUserRole(user.Id, "Member");
             db.SaveChanges();
 
@@ -185,6 +201,108 @@ namespace FinPortal.Controllers
                 return RedirectToAction("Index");
             }
             return View(household);
+        }
+        [Authorize(Roles ="Head")]
+        public ActionResult ExitDenied()
+        {
+            return View();
+        }
+        [Authorize(Roles = "Head")]
+        public ActionResult ChangeHead()
+        {
+            var myHouseId = db.Users.Find(User.Identity.GetUserId()).HouseholdId ?? 0;
+            if(myHouseId == 0)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            var members = db.Users.Where(u => u.HouseholdId == myHouseId).ToList();
+            ViewBag.NewHoH = new SelectList(members, "Id", "FullName");
+            return View();
+        }
+        [HttpPost, ActionName("ChangeHead")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ChangeHeadAsync(string newHoH, bool leave)
+        {
+            if (string.IsNullOrEmpty(newHoH))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            var user = db.Users.Find(User.Identity.GetUserId());
+            roleHelper.UpdateUserRole(newHoH, "Head");
+            if (leave)
+            {
+                user.Household.IsDeleted = true;
+                user.HouseholdId = null;
+                foreach (var account in user.Accounts)
+                {
+                    account.HouseholdId = null;
+                }
+                foreach (var budget in user.Budgets)
+                {
+                    budget.HouseholdId = null;
+                }
+                db.SaveChanges();
+                roleHelper.UpdateUserRole(user.Id, "New User");
+                await AuthorizeExtensions.RefreshAuthentication(HttpContext, user);
+            }
+            else
+            {
+                roleHelper.UpdateUserRole(user.Id, "Member");
+                await AuthorizeExtensions.RefreshAuthentication(HttpContext, user);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<ActionResult> LeaveAsync()
+        {
+            var userId = User.Identity.GetUserId();
+            var user = db.Users.Find(userId);
+            var role = roleHelper.ListUserRoles(userId).FirstOrDefault();
+            switch (role)
+            {
+                case "Head":
+                    var memberCount = db.Users.Where(g => g.HouseholdId == user.HouseholdId).Count() - 1;
+                    if(memberCount >= 1)
+                    {
+                        TempData["Message"] = $"You are unable to leave the Household at this <br/>time, as there are still {memberCount} other members.";
+                        return RedirectToAction("ExitDenied");
+                    }
+                    user.Household.IsDeleted = true;
+                    user.HouseholdId = null;
+                    foreach(var account in user.Accounts)
+                    {
+                        account.HouseholdId = null;
+                    }
+                    foreach (var budget in user.Budgets)
+                    {
+                        budget.HouseholdId = null;
+                    }
+                    //var household = db.Households.Find(user.HouseholdId);
+                    //db.Households.Remove(household);
+                    roleHelper.UpdateUserRole(userId, "New User");
+                    db.SaveChanges();
+                    await AuthorizeExtensions.RefreshAuthentication(HttpContext, user);
+                    return RedirectToAction("Index","Home");
+                case "Member":
+                    user.HouseholdId = null;
+                    foreach (var account in user.Accounts)
+                    {
+                        account.HouseholdId = null;
+                    }
+                    foreach (var budget in user.Budgets)
+                    {
+                        budget.HouseholdId = null;
+                    }
+                    roleHelper.UpdateUserRole(userId, "New User");
+                    db.SaveChanges();
+
+
+                    await AuthorizeExtensions.RefreshAuthentication(HttpContext, user);
+
+                    return RedirectToAction("Index", "Home");
+                default:
+                    return RedirectToAction("Index","Home");
+            }
         }
 
         // GET: Households/Delete/5

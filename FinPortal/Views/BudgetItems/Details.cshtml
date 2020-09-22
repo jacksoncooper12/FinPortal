@@ -3,64 +3,56 @@
 @{
     ViewBag.Title = "Details";
 }
-
-<h2>Details</h2>
-
-<div>
-    <h4>BudgetItem</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Budget.OwnerId)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Budget.OwnerId)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.ItemName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ItemName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.TargetAmount)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.TargetAmount)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.CurrentAmount)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.CurrentAmount)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-
-    </dl>
+    <div class="modal fade ct" id="deleteT" style="padding-top:7rem">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+                <div class="modal-header text-center" style=" ">
+                    <h2 class="modal-title">Delete</h2>
+                </div>
+                <div class="modal-body" style=" padding:30px">
+                    @using (Html.BeginForm("Delete", "BudgetItems", FormMethod.Post))
+                    {
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col text-center">
+                                <h2 class="spacePad">Are you sure you want to<br />delete this Item?</h2>
+                                <button class="btn cb" type="submit" value="delete" style="margin-top:2rem" onclick="window.location.href='@Url.Action("Delete", "BudgetItems", new { Model.Id })'"><h3>Delete</h3></button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="row" style="padding-top:40px; padding-bottom:15px">
+    <div class="col" data-target="#editT" data-toggle="modal">
+        <button class="btn cb" onclick="window.location.href='@Url.Action("Edit","BudgetItems",new { Model.Id})'"><h3>Edit Item</h3></button>
+    </div>
+    <div class="col text-right" data-target="#deleteT" data-toggle="modal">
+        <button class="btn cb"><h3>Delete Item</h3></button>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+<div class="jumbotron">
+    <div class="row">
+        <div class="col text-center">
+            <h1>@Model.ItemName</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center baPad">
+            <h4>Current Amount</h4>
+        </div>
+        <div class="col text-center baPad">
+            <h4>Target Amount</h4>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:-4rem !important">
+        <div class="col text-center" style="border-right:2px solid black; padding-top:1.5rem">
+            <h2 style="padding-bottom:2rem">$<span class="count">@Model.CurrentAmount</span></h2>
+        </div>
+        <div class="col text-center" style=" padding-top:1.5rem">
+            <h2>$<span class="count">@Model.TargetAmount</span></h2>
+        </div>
+    </div>
+</div>

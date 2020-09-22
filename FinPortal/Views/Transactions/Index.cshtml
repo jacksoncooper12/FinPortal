@@ -1,75 +1,147 @@
 ﻿@model IEnumerable<FinPortal.Models.Transaction>
-
+@using Microsoft.AspNet.Identity
 @{
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
-
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.BudgetItem.ItemName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Owner.FirstName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AccountId)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.TransactionType)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Created)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Amount)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Memo)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </th>
-        <th></th>
-    </tr>
-
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.BudgetItem.ItemName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Owner.FirstName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AccountId)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.TransactionType)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Created)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Amount)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Memo)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IsDeleted)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
+<div class="row">
+    <div class="col">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col">
+                    <h2 style="margin-bottom:2rem; margin-top:-1rem">Household Transactions</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table dataTable" id="allAcc">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Amount
+                                </th>
+                                <th>
+                                    Type
+                                </th>
+                                <th>
+                                    Owner
+                                </th>
+                                <th>
+                                    Account
+                                </th>
+                                <th>
+                                    Budget Item
+                                </th>
+                                <th>
+                                    Date
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var account in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        $@account.Amount
+                                    </td>
+                                    <td>
+                                        @account.TransactionType
+                                    </td>
+                                    <td>
+                                        @account.Owner.FullName
+                                    </td>
+                                    <td>
+                                        @account.Account.AccountName
+                                    </td>
+                                    <td>
+                                        @account.BudgetItem.ItemName
+                                    </td>
+                                    <td>
+                                        @account.Created.ToString("MM/dd/yyyy")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col">
+                    <h2 style="margin-bottom:2rem; margin-top:-1rem">My Transactions</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table dataTable" id="myAcc">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Amount
+                                </th>
+                                <th>
+                                    Type
+                                </th>
+                                <th>
+                                    Account
+                                </th>
+                                <th>
+                                    Budget Item
+                                </th>
+                                <th>
+                                    Date
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var account in Model.Where(g => g.OwnerId == User.Identity.GetUserId()))
+                            {
+                                <tr class="hover" onclick="document.location.href='@Url.Action("Details","Transactions", new { account.Id})'">
+                                    <td>
+                                        $@account.Amount
+                                    </td>
+                                    <td>
+                                        @account.TransactionType
+                                    </td>
+                                    <td>
+                                        @account.Account.AccountName
+                                    </td>
+                                    <td>
+                                        @account.BudgetItem.ItemName
+                                    </td>
+                                    <td>
+                                        @account.Created.ToString("MM/dd/yyyy")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        jQuery(document).ready(function () {
+            setTimeout(function () { jQuery('#myA').click() }, 300);
+        });
+        jQuery(document).ready(function () {
+            jQuery('#allAcc').DataTable({
+                "pageLength": 10,
+                "order": [[5, "desc"]]
+            });
+        });
+        jQuery(document).ready(function () {
+            jQuery('#myAcc').DataTable({
+                "pageLength": 10,
+                "order": [[4, "desc"]]
+            });
+        });
+    </script>
 }
-
-</table>

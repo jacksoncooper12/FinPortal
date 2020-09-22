@@ -3,80 +3,119 @@
 @{
     ViewBag.Title = "Details";
 }
-
-<h2>Details</h2>
-
-<div>
-    <h4>Transaction</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.BudgetItem.ItemName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.BudgetItem.ItemName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Owner.FirstName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Owner.FirstName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.AccountId)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AccountId)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.TransactionType)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.TransactionType)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Amount)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Amount)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Memo)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Memo)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-
-    </dl>
+<div class="modal fade ct" id="editT" style="padding-top:7rem">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+            <div class="modal-header text-center" style=" ">
+                <h2 class="modal-title">Edit</h2>
+            </div>
+            <div class="modal-body" style=" padding:30px">
+                @using (Html.BeginForm("Edit", "Transactions", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.AccountId)
+                    @Html.HiddenFor(model => model.BudgetItemId)
+                    @Html.HiddenFor(model => model.OwnerId)
+                    @Html.HiddenFor(model => model.Created)
+                    @Html.HiddenFor(model => model.Id)
+                    <div class="row spacePad">
+                        <div class="col-md-6 bPad">
+                            <h5 class="bPad">Type</h5>
+                            @Html.EnumDropDownListFor(model => model.TransactionType, htmlAttributes: new { @class = "form-control bPad" })
+                        </div>
+                        <div class="col-md-6 bPad">
+                            <h5 class="bPad">Amount</h5>
+                            <h5>@Html.EditorFor(model => model.Amount, new { htmlAttributes = new { type = "number", @class = "form-control bPad" } })</h5>
+                        </div>
+                    </div>
+                    <div class="row spacePad">
+                        <div class="col-md-12 bPad">
+                            <h5 class="bPad">Memo</h5>
+                            <h5>@Html.TextAreaFor(model => model.Memo, new { rows = 5, @class = "form-control bPad" })</h5>
+                        </div>
+                    </div>
+                    <div class="row spacePad">
+                        <div class="col">
+                            <button type="submit" class="btn cb">Update Transaction</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+<div class="modal fade ct" id="deleteT" style="padding-top:7rem">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+            <div class="modal-header text-center" style=" ">
+                <h2 class="modal-title">Delete</h2>
+            </div>
+            <div class="modal-body" style=" padding:30px">
+                @using (Html.BeginForm("Delete", "Transactions", FormMethod.Post))
+                {
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col text-center">
+                            <h2 class="spacePad">Are you sure you want to<br />delete this Transaction?</h2>
+                            <button class="btn cb" type="submit" value="delete" style="margin-top:2rem" onclick="window.location.href='@Url.Action("Delete", "Transactions", new { Model.Id })'"><h3>Delete</h3></button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row"style="padding-top:40px; padding-bottom:15px">
+    <div class="col" data-target="#editT" data-toggle="modal" >
+        <button class="btn cb"><h3>Edit Transaction</h3></button>
+    </div>
+    <div class="col text-right" data-target="#deleteT" data-toggle="modal" >
+        <button class="btn cb"><h3>Delete Transaction</h3></button>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col text-center">
+                    <h1>@Model.Memo</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center baPad">
+                    <h4>Bank Account</h4>
+                </div>
+                <div class="col text-center baPad">
+                    <h4>Amount</h4>
+                </div>
+                <div class="col text-center baPad">
+                    <h4>Budget</h4>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:-4rem !important">
+                <div class="col text-center" style="border-right:2px solid black; padding-top:1.5rem">
+                    <h4 style="padding-bottom:2rem">@Model.Account.AccountName</h4>
+                </div>
+                <div class="col text-center" style=" border-right:2px solid black;padding-top:1.5rem">
+                    @if (Model.TransactionType == FinPortal.Enums.TransactionType.Deposit)
+                    {
+                        <h2 style="font-weight:bold; color:forestgreen">$<span class="count">@Model.Amount</span></h2>
+                    }
+                    else if (Model.TransactionType == FinPortal.Enums.TransactionType.Withdrawal)
+                    {
+                        <h2 style="font-weight:bold; color:red">$<span class="count">@Model.Amount</span></h2>
+                    }
+                    else
+                    {
+                        <h2>$<span class="count">@Model.Amount</span></h2>
+                    }
+                </div>
+                <div class="col text-center" style=" padding-top:1.5rem">
+                    <h4>@Model.BudgetItem.ItemName</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

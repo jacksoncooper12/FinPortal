@@ -6,17 +6,23 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FinPortal.Enums;
+using FinPortal.Extensions;
 
 namespace FinPortal.Controllers
 {
     public class HomeController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
-        
+
         [Authorize]
         public ActionResult Index()
         {
-            var acType = new BankAccount();
+            var user = db.Users.Find(User.Identity.GetUserId());
+            var userId = user.Id;
+            ViewBag.AccountId = new SelectList(db.BankAccounts.Where(g => g.OwnerId == userId), "Id", "AccountName");
+            ViewBag.BudgetItemId = new SelectList(db.BudgetItems.Where(g => g.Budget.OwnerId == userId), "Id", "ItemName");
+            ViewBag.BudgetId = new SelectList(db.Budgets.Where(g => g.OwnerId == user.Id), "Id", "BudgetName");
+            var tType = new BankAccount();
             return View();
         }
         public PartialViewResult _LoginPartial()

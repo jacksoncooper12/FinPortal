@@ -3,88 +3,244 @@
 @{
     ViewBag.Title = "Details";
 }
-
-<h2>Details</h2>
-
-<div>
-    <h4>BankAccount</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Household.HouseholdName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Household.HouseholdName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Owner.FirstName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Owner.FirstName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.AccountName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AccountName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.StartingBalance)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.StartingBalance)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.CurrentBalance)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.CurrentBalance)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.WarningBalance)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.WarningBalance)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.AccountType)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AccountType)
-        </dd>
-
-    </dl>
+<div class="modal fade ct" id="editB" style="padding-top:7rem">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+            <div class="modal-header text-center" style=" ">
+                <h2 class="modal-title">Edit</h2>
+            </div>
+            <div class="modal-body" style=" padding:30px">
+                @using (Html.BeginForm("Edit", "BankAccounts", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.HouseholdId)
+                    @Html.HiddenFor(model => model.OwnerId)
+                    @Html.HiddenFor(model => model.Created)
+                    @Html.HiddenFor(model => model.StartingBalance)
+                    @Html.HiddenFor(model => model.IsDeleted)
+                    <div class="row spacePad">
+                        <div class="col-md-12 bPad">
+                            <h5 class="bPad">Account Name</h5>
+                            <h5>@Html.EditorFor(model => model.AccountName, new { htmlAttributes = new { @class = "form-control bPad" } })</h5>
+                        </div>
+                    </div>
+                    <div class="row spacePad">
+                        <div class="col-md-6 bPad">
+                            <h5 class="bPad">Current Balance</h5>
+                            <h5>@Html.EditorFor(model => model.CurrentBalance, new { htmlAttributes = new { type = "number", @class = "form-control bPad" } })</h5>
+                            <h5 id="overdrawn" style="font-weight:bold; color:red"></h5>
+                        </div>
+                        <div class="col-md-6 bPad">
+                            <h5 class="bPad">Warning Balance</h5>
+                            <h5>@Html.EditorFor(model => model.WarningBalance, new { htmlAttributes = new { type = "number", @class = "form-control bPad" } })</h5>
+                            <h5 id="warning" style="font-weight:bold; color:gold"></h5>
+                        </div>
+                    </div>
+                    <div class="row spacePad">
+                        <div class="col-md-12 bPad">
+                            <h5 class="bPad">Account Type</h5>
+                            <h5>@Html.EnumDropDownListFor(model => model.AccountType, htmlAttributes: new { @class = "form-control bPad" })</h5>
+                        </div>
+                    </div>
+                    <div class="row spacePad">
+                        <div class="col">
+                            <button type="submit" class="btn cb">Update Account</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+<div class="modal fade ct" id="deleteB" style="padding-top:7rem">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content" style="background-color: rgba(245, 245, 245, 0.98); color:black">
+            <div class="modal-header text-center" style=" ">
+                <h2 class="modal-title">Delete</h2>
+            </div>
+            <div class="modal-body" style=" padding:30px">
+                @using (Html.BeginForm("Delete", "BankAccounts", FormMethod.Post))
+                {
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col text-center">
+                            <h2 class="spacePad">Are you sure you want to<br />delete this Account?</h2>
+                            <button class="btn cb" type="submit" value="delete" style="margin-top:2rem" onclick="window.location.href='@Url.Action("Delete", "BankAccounts", new { Model.Id })'"><h3>Delete</h3></button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div style="font-size:24px; margin-top:-2rem"><a href="#" data-toggle="modal" data-target="#editB">Edit Your Account</a></div>
+    </div>
+    <div class="col text-right">
+        <div style="font-size:24px; margin-top:-2rem"><a href="#" data-toggle="modal" data-target="#deleteB">Delete Your Account</a></div>
+    </div>
+</div>
+
+<div class="jumbotron">
+    <div class="row">
+        <div class="col text-center">
+            <h1>@Model.AccountName</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center baPad">
+            <h4>Starting Balance</h4>
+        </div>
+        <div class="col text-center baPad">
+            <h4>Current Balance</h4>
+        </div>
+        <div class="col text-center baPad">
+            <h4>Warning Balance</h4>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:-4rem !important">
+        <div class="col text-center" style="border-right:2px solid black; padding-top:1.5rem">
+            <h2 style="padding-bottom:2rem">$<span class="count">@Model.StartingBalance</span></h2>
+        </div>
+        <div class="col text-center" style="border-right:2px solid black; padding-top:1.5rem">
+            <h2>$<span class="count">@Model.CurrentBalance</span></h2>
+        </div>
+        <div class="col text-center" style=" padding-top:1.5rem">
+            <h2>$<span class="count">@Model.WarningBalance</span></h2>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="panel-group white" id="accordion" style="border-bottom:2px solid cornflowerblue" data-target="#panel4" data-toggle="collapse">
+            <div class="panel-group panel-primary">
+                <div class="panel-heading" id="myA">
+                    <div class="row">
+                        <div class="col">
+                            <h4>Transactions</h4>
+                        </div>
+                        <div class="col text-right">
+                            <i class="fa fa-arrow-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-collapse collapse" id="panel4">
+                    <div class="panel-body morePad">
+                        @if (Model.Transactions.Count() == 0)
+                        {
+                            <div class="row morePad">
+                                <div class="col text-center">
+                                    <h4>This account currently has no transactions</h4>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <table class="table dataTable" id="trans1">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Type
+                                        </th>
+                                        <th>
+                                            Amount
+                                        </th>
+                                        <th>
+                                            Memo
+                                        </th>
+                                        <th>
+                                            Budget
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.Transactions)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @transaction.TransactionType
+                                            </td>
+                                            @if (transaction.TransactionType.ToString() == "Deposit")
+                                            {
+                                                <td style="font-weight:bold; color:forestgreen">
+                                                    $@transaction.Amount
+                                                </td>
+                                            }
+                                            else if (transaction.TransactionType.ToString() == "Withdrawal")
+                                            {
+                                                <td style="font-weight:bold; color:red">
+                                                    $@transaction.Amount
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td style="font-weight:bold; color:forestgreen">
+                                                    $@transaction.Amount
+                                                </td>
+                                            }
+
+                                            <td>
+                                                @transaction.Memo
+                                            </td>
+                                            <td>
+                                                @transaction.BudgetItem.Budget.BudgetName
+                                            </td>
+                                            <td>
+                                                @transaction.Created.ToString("MM/dd/yyy")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+@section scripts{
+    <script>
+        jQuery(document).ready(function () {
+            setTimeout(function () { jQuery('#myA').click() }, 300);
+        });
+        jQuery(document).ready(function () {
+            jQuery('#trans1').DataTable({
+                "pageLength": 10,
+                "order": [[4, "desc"]]
+            });
+        });
+        jQuery("#WarningBalance").keyup(function () {
+            let wB = parseInt(jQuery("#WarningBalance").val())
+            let cB = parseInt(jQuery("#CurrentBalance").val())
+            if (cB < wB) {
+                jQuery("#warning").html("Your Warning Balance will be higher than your Current Balance");
+            }
+            else {
+                jQuery("#warning").html("");
+
+            }
+            console.log(wB);
+        });
+        jQuery("#CurrentBalance").keyup(function () {
+            let cB = parseInt(jQuery("#CurrentBalance").val())
+            if (cB < 0) {
+                jQuery("#overdrawn").html("You will overdraft your Account with these settings");
+            }
+            else {
+                jQuery("#overdrawn").html("");
+            }
+            console.log(wB);
+        });
+    </script>
+}
+
+

@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using FinPortal.Models;
+using Microsoft.AspNet.Identity;
 
 namespace FinPortal.Controllers
 {
@@ -39,7 +40,8 @@ namespace FinPortal.Controllers
         // GET: BudgetItems/Create
         public ActionResult Create()
         {
-            ViewBag.BudgetId = new SelectList(db.Budgets, "Id", "OwnerId");
+            var user = db.Users.Find(User.Identity.GetUserId());
+            ViewBag.BudgetId = new SelectList(db.Budgets.Where(g=>g.OwnerId == user.Id), "Id", "BudgetName");
             return View();
         }
 
@@ -48,13 +50,14 @@ namespace FinPortal.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,BudgetId,Created,ItemName,TargetAmount,CurrentAmount,IsDeleted")] BudgetItem budgetItem)
+        public ActionResult Create([Bind(Include = "Id,BudgetId,ItemName,TargetAmount,CurrentAmount,IsDeleted")] BudgetItem budgetItem)
         {
             if (ModelState.IsValid)
             {
+                budgetItem.Created = DateTime.Now;
                 db.BudgetItems.Add(budgetItem);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.BudgetId = new SelectList(db.Budgets, "Id", "OwnerId", budgetItem.BudgetId);

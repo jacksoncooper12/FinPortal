@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
-
+using System.ComponentModel.DataAnnotations.Schema;
 namespace FinPortal.Models
 {
     public class Budget
     {
         private ApplicationDbContext db = new ApplicationDbContext();
         public int Id { get; set; }
-        public int HouseholdId { get; set; }
+        public int? HouseholdId { get; set; }
         public virtual Household Household { get; set; }
         public string OwnerId { get; set; }
-        public ApplicationUser Owner { get; set; }
+        public virtual ApplicationUser Owner { get; set; }
         public DateTime Created { get; set; }
 
         [Display(Name = "Name")]
@@ -22,7 +22,10 @@ namespace FinPortal.Models
 
         [Display(Name = "Current Amount")]
         public decimal CurrentAmount { get; set; }
+        [Display(Name = "Delete")]
+        public bool IsDeleted { get; set; }
 
+        [NotMapped]
         [Display(Name = "Target Amount")]
         public decimal TargetAmount
         {

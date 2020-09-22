@@ -1,0 +1,21 @@
+﻿
+@{
+    ViewBag.Title = "ChangeHead";
+}
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <h2 class="morePad">Change Head of Household</h2>
+                <h3 class="morePad">You must select a new Head before leaving this household</h3>
+                @using (Html.BeginForm("ChangeHead", "Households", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken();
+                    @Html.DropDownList("NewHoH", null, "Choose New Head")
+                    <button type="submit" name="Leave" value="false" class="btn cb">Reassign</button>
+                    <button type="submit" name="Leave" value="true" class="btn btn-warning">Reassign & Leave</button>
+                }
+            </div>
+        </div>
+    </div>
+
+

@@ -1,81 +1,155 @@
 ﻿@model IEnumerable<FinPortal.Models.BankAccount>
+@using Microsoft.AspNet.Identity
 
 @{
     ViewBag.Title = "Index";
+    FinPortal.Helpers.UserHelper userHelper = new FinPortal.Helpers.UserHelper();
+    var user = userHelper.CurrentUser();
 }
 
-<h2>Index</h2>
+<div class="row">
+    <div class="col">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col">
+                    <h2 style="margin-bottom:2rem; margin-top:-1rem">Household Bank Accounts</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table dataTable" id="allAcc">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Account
+                                </th>
+                                <th>
+                                    Type
+                                </th>
+                                <th>
+                                    Owner
+                                </th>
+                                <th>
+                                    Current Balance
+                                </th>
+                                <th>
+                                    Warning Balance
+                                </th>
+                                <th>
+                                    Date
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (user.HouseholdId != null)
+                            {
+                                foreach (var account in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @account.AccountName
+                                        </td>
+                                        <td>
+                                            @account.AccountType
+                                        </td>
+                                        <td>
+                                            @account.Owner.FullName
+                                        </td>
+                                        <td>
+                                            $@account.StartingBalance
+                                        </td>
+                                        <td>
+                                            $@account.WarningBalance
+                                        </td>
+                                        <td>
+                                            @account.Created.ToString("MM/dd/yyyy")
+                                        </td>
+                                    </tr>
+                                }
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Household.HouseholdName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Owner.FirstName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AccountName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Created)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.StartingBalance)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CurrentBalance)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.WarningBalance)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AccountType)
-        </th>
-        <th></th>
-    </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col">
+                    <h2 style="margin-bottom:2rem; margin-top:-1rem">My Bank Accounts</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table dataTable" id="myAcc">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Account
+                                </th>
+                                <th>
+                                    Type
+                                </th>
+                                <th>
+                                    Current Balance
+                                </th>
+                                <th>
+                                    Warning Balance
+                                </th>
+                                <th>
+                                    Date
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var account in Model.Where(g => g.OwnerId == User.Identity.GetUserId()))
+                            {
+                                <tr class="hover" onclick="document.location.href='@Url.Action("Details","BankAccounts", new { account.Id})'">
+                                    <td>
+                                        @account.AccountName
+                                    </td>
+                                    <td>
+                                        @account.AccountType
+                                    </td>
+                                    <td>
+                                        $@account.StartingBalance
+                                    </td>
+                                    <td>
+                                        $@account.WarningBalance
+                                    </td>
+                                    <td>
+                                        @account.Created.ToString("MM/dd/yyyy")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Household.HouseholdName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Owner.FirstName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AccountName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Created)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.StartingBalance)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.CurrentBalance)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.WarningBalance)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IsDeleted)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AccountType)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
+@section scripts{
+    <script>
+        jQuery(document).ready(function () {
+            setTimeout(function () { jQuery('#myA').click() }, 300);
+        });
+        jQuery(document).ready(function () {
+            jQuery('#allAcc').DataTable({
+                "pageLength": 10,
+                "order": [[5, "desc"]]
+            });
+        });
+        jQuery(document).ready(function () {
+            jQuery('#myAcc').DataTable({
+                "pageLength": 10,
+                "order": [[4, "desc"]]
+            });
+        });
+    </script>
 }
-
-</table>
